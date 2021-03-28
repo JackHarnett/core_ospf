@@ -45,7 +45,9 @@ session.mobility.set_model_config(
     {
         "range": "280",
         "bandwidth": "55000000",
-        "delay": "100"
+        "delay": "100",
+        "error": 0,
+        "jitter":0
     },
 )
 
