@@ -1,3 +1,10 @@
+
+##########################################################
+#                                                        #
+# Written for outdated version of CORE - do not use this #
+#                                                        #
+##########################################################
+
 # required imports
 import time
 
@@ -7,6 +14,7 @@ from core.emulator.enumerations import EventTypes
 from core.location.mobility import BasicRangeModel
 from core.nodes.base import CoreNode
 from core.nodes.network import WlanNode
+from string import Template
 
 config = """
 router ospf
