@@ -1,3 +1,4 @@
+import os
 from pipes import Template
 
 from core.emulator.data import NodeOptions, IpPrefixes, InterfaceData, LinkOptions
@@ -51,16 +52,14 @@ class NodeWrapper:
         return self
 
     # Boot all enabled services on the node (eg OSPF) after the session has already been initiated
-    def start_ospf(self):
+    def start_services(self):
         self.session.services.boot_services(self.node)
-        self.session.services.get_service(self.node.id, "pcap")
         return self
 
+    # Read the captures packets from the specified interface.
+    # NB: stored in a mounter folder, so easier to open using WireShark locally
     def read_capture(self, iface: str = "eth0"""):
         path = "/".join([self.session.session_dir, self.node.name + ".conf", "%s.%s.pcap" % (self.node.name, iface)])
-        file = open(path)
-        try:
-            out = file.read()
-            print(out)
-        except:
-            print()
+        output = self.node.cmd("tcpdump -r %s" % path)
+        print("TCP Dump:", output)
+

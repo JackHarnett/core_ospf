@@ -51,8 +51,8 @@ print("\n Number of neighbours: ", len(x.splitlines()) - 1)
 x = nodes[-1].node.cmd(f" ping -c 5 %s" % nodes[2].ip_addr)
 print("\n --- Ping [%s] \n %s --- \n %s" % (nodes[2].node.name, nodes[2].ip_addr, x))
 
-print("---- Read Capture -----")
-nodes[2].read_capture()
+#print("---- Read Capture -----")
+#nodes[2].read_capture()
 
 print("------ Adding new node ------")
 
@@ -69,10 +69,10 @@ print("\n Number of neighbours: ", len(x.splitlines()) - 1)
 x = nodes[-1].node.cmd(f" ping -c 5 %s" % nodes[2].ip_addr)
 print("\n --- Ping [%s] \n %s --- \n %s" % (nodes[2].node.name, nodes[2].ip_addr, x))
 
-print("---- Read Capture -----")
-nodes[2].read_capture()
+#print("---- Read Capture -----")
+#nodes[2].read_capture()
 
-input("Enter")
+input("Press any key to continue...")
 
 # stop session
 session.shutdown()
