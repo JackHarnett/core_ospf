@@ -41,19 +41,22 @@ for x in range(10):
 session.instantiate()
 print("------ Starting Session ------")
 
-time.sleep(20)
+time.sleep(10)
 
 x = nodes[-1].node.cmd(f"vtysh -c 'show ip ospf neighbor'")
 print("\n--- Neighbours --- \n", x)
 print("\n Number of neighbours: ", len(x.splitlines()) - 1)
 
-x = nodes[-1].node.cmd(f" ping -c 5 %s" % nodes[1].ip_addr)
-print("\n --- Ping %s --- \n %s" % (nodes[1].ip_addr, x))
+
+x = nodes[-1].node.cmd(f" ping -c 5 %s" % nodes[2].ip_addr)
+print("\n --- Ping [%s] \n %s --- \n %s" % (nodes[2].node.name, nodes[2].ip_addr, x))
+
+print("---- Read Capture -----")
+nodes[2].read_capture()
 
 print("------ Adding new node ------")
 
 nodes.append(NodeWrapper(session).add_node(x=50 + 500, y=500).link_wlan(ip_prefixes, wlan))
-nodes[-1].start_ospf()
 
 print("------ Waiting for convergence ------")
 
@@ -63,8 +66,13 @@ x = nodes[-1].node.cmd(f"vtysh -c 'show ip ospf neighbor'")
 print("\n--- Neighbours --- \n", x)
 print("\n Number of neighbours: ", len(x.splitlines()) - 1)
 
-x = nodes[-1].node.cmd(f" ping -c 5 %s" % nodes[1].ip_addr)
-print("\n --- Ping %s --- \n %s" % (nodes[1].ip_addr, x))
+x = nodes[-1].node.cmd(f" ping -c 5 %s" % nodes[2].ip_addr)
+print("\n --- Ping [%s] \n %s --- \n %s" % (nodes[2].node.name, nodes[2].ip_addr, x))
+
+print("---- Read Capture -----")
+nodes[2].read_capture()
+
+input("Enter")
 
 # stop session
 session.shutdown()
