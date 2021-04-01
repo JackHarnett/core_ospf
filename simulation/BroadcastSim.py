@@ -13,6 +13,9 @@ coreemu = CoreEmu()
 session = coreemu.create_session()
 session.set_state(EventTypes.CONFIGURATION_STATE)
 
+# Number of nodes on the network
+num_nodes = 10
+
 # List of all nodes in the simulation
 nodes = []
 
@@ -35,7 +38,7 @@ session.mobility.set_model_config(
     },
 )
 
-for x in range(10):
+for x in range(num_nodes):
     nodes.append(NodeWrapper(session).add_node(x=50 + 100 * x, y=20 + 100 * x).link_wlan(ip_prefixes, wlan))
 
 session.instantiate()
@@ -44,36 +47,17 @@ print("------ Starting Session ------")
 time.sleep(10)
 
 x = nodes[-1].node.cmd(f"vtysh -c 'show ip ospf neighbor'")
-print("\n--- Neighbours --- \n", x)
 print("\n Number of neighbours: ", len(x.splitlines()) - 1)
 
+print("--- Broadcast UDP ---")
+#nodes[-1].send_udp_broadcast(1024)
+#nodes[-1].send_udp(destination="192.128.64.255", port=5000, size=1024)
+#nodes[-1].send_udp(destination=nodes[1].ip_addr, port=5000, size=(2 * 1024)-48)
+print("Name: ", nodes[1].node.name)
 
-x = nodes[-1].node.cmd(f" ping -c 5 %s" % nodes[2].ip_addr)
-print("\n --- Ping [%s] \n %s --- \n %s" % (nodes[2].node.name, nodes[2].ip_addr, x))
-
-print("------ Sending UDP ------")
-nodes[-1].send_udp(destination=nodes[2].ip_addr, port=5000, size=1024)
-
-print("------ Adding new node ------")
-
-nodes.append(NodeWrapper(session).add_node(x=50 + 500, y=500).link_wlan(ip_prefixes, wlan))
-nodes[-1].start_services()
-
-print("------ Waiting for convergence ------")
-
-time.sleep(10)
-
-x = nodes[-1].node.cmd(f"vtysh -c 'show ip ospf neighbor'")
-print("\n--- Neighbours --- \n", x)
-print("\n Number of neighbours: ", len(x.splitlines()) - 1)
-
-x = nodes[-1].node.cmd(f" ping -c 5 %s" % nodes[2].ip_addr)
-print("\n --- Ping [%s] \n %s --- \n %s" % (nodes[2].node.name, nodes[2].ip_addr, x))
-
-#print("---- Read Capture -----")
-#nodes[2].read_capture()
-
-print("python test:", nodes[-1].node.cmd("python -c \"print('jack')\""))
+#x= nodes[-1].node.cmd("route -n")
+#x = nodes[-1].node.cmd(f" ping -b -c 1 -s %s %s" % (1024-42, nodes[4].ip_addr))
+print(x)
 
 input("Press any key to continue...")
 
