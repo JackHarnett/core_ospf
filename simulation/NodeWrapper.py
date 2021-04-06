@@ -1,4 +1,4 @@
-
+from core import errors
 from core.emulator.data import NodeOptions, IpPrefixes, InterfaceData, LinkOptions
 from core.emulator.session import Session
 from core.nodes.base import CoreNode
@@ -42,6 +42,11 @@ class NodeWrapper:
 
         return self
 
+    def configue_ospf(self):
+        quagga = "/".join([self.session.session_dir, self.node.name + ".conf", "usr.local.etc.quagga" ,"Quagga.conf"])
+        print("quagga path", quagga)
+        print("Cat ", self.node.cmd("cat %s" % quagga))
+
     # Create a link between this node and the WLAN with the specified link options
     def link_wlan(self, ip: IpPrefixes, wlan: WlanNode, link_options: LinkOptions = LinkOptions()):
         self.interface = ip.create_iface(self.node)  # create an IP link
@@ -54,27 +59,35 @@ class NodeWrapper:
         self.session.services.boot_services(self.node)
         return self
 
+    def stop_service(self, service):
+        self.session.services.stop_service(self.node, service)
+
     # Read the captures packets from the specified interface.
-    # NB: stored in a mounter folder, so easier to open using WireShark locally
-    def read_capture(self, iface: str = "eth0"):
+    def read_capture(self, iface: str = "eth0", port: int = -1) -> str:
         path = "/".join([self.session.session_dir, self.node.name + ".conf", "%s.%s.pcap" % (self.node.name, iface)])
-        output = self.node.cmd("tcpdump -r %s" % path)
-        print("TCP Dump:", output)
+        if port > 0:
+            output = self.node.cmd("tcpdump -r %s 'port %i'" % (path, port))
+        else:
+            output = self.node.cmd("tcpdump -r %s" % path)
 
-    def listen(self, port: int):
-        self.node.cmd("mgen port %i output log.drc" % port, wait=False)
+        return output
 
-    def send_udp(self, destination: str, size: int, port: int = 5000):
+    def num_ospf_packets(self, iface: str = "eth0"):
+        path = "/".join([self.session.session_dir, self.node.name + ".conf", "%s.%s.pcap" % (self.node.name, iface)])
+        try:
+            output = self.node.host_cmd("tshark -r %s -Y ospf")
+        except errors.CoreCommandError as e:
+            output = str(e)
+
+        return len(output.splitlines()) - 1
+
+    # Send a single UDP packet using mgen of the specified size to the destination.
+    def send_udp(self, destination: str, size: int, port: int = 5000, debug: str=False):
         cmd_str = 'mgen event "ON 1 UDP SRC %s DST %s/%i PERIODIC [0.2 %i] count 1"' % (port, destination, port, size)
-        print(cmd_str)
-        output = self.node.cmd(cmd_str, wait=True)
-        print("Sending to ", destination)
-        print(output)
+        self.node.cmd(cmd_str, wait=False)
 
-    def send_udp_node(self, node, size: int):
-        return self.send_udp(node.ip_addr, size=size)
+        if debug:
+            print("Sending to ", destination)
 
-    def send_udp_broadcast(self, size: int):
-        return self.send_udp("225.0.0.5", size=size)
 
 
